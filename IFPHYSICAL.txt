@@ -21,6 +21,7 @@ void setup() {
   pinMode(irReceiverPinMid, INPUT); pinMode(irLedPinMid, OUTPUT);
   pinMode(irReceiverPinRight, INPUT); pinMode(irLedPinRight, OUTPUT);
   Serial.begin(9600);
+  delay(5000);
 }
 
 void loop() {
@@ -42,9 +43,7 @@ void loop() {
     turn_right(speed);
     pass = 0;
   }
-  else{
-    
-  }
+  
   if (pass > 0){
     forward(speed);
     if (pass > 1){
