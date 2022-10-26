@@ -1,0 +1,108 @@
+#include <Servo.h> 
+Servo servoLeft;
+Servo servoRight;
+
+const int irLedPinLeft=10, irReceiverPinLeft=11;
+const int irLedPinMid=2, irReceiverPinMid=3;
+const int irLedPinRight=6, irReceiverPinRight=7;
+int speed = 200;
+int pass = 0;
+int Ladjustment = 10;
+int Radjustment = 10;
+int L2adjustment = 5;
+void setup() {
+  // put your setup code here, to run once:
+  servoLeft.attach(13);
+  servoRight.attach(12);
+  tone(irLedPinLeft, 3000, 8); 
+  tone(irLedPinMid, 3000, 8);
+  tone(irLedPinRight, 3000, 8);
+  pinMode(irReceiverPinLeft, INPUT); pinMode(irLedPinLeft, OUTPUT);
+  pinMode(irReceiverPinMid, INPUT); pinMode(irLedPinMid, OUTPUT);
+  pinMode(irReceiverPinRight, INPUT); pinMode(irLedPinRight, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  int irValLeft = irDetectLeft(38000);  
+  int irValRight = irDetectRight(38000);
+  int irValMid = irDetectMid(38000);
+  Serial.print(irValLeft);
+  Serial.print(irValRight);
+  Serial.println(irValMid);
+  if (irValMid == 1){
+    forward(speed);
+  }
+  else if (irValLeft == 1){
+    turn_left(speed);
+    pass = 0;
+  }
+  else if (irValRight == 1){
+    turn_right(speed);
+    pass = 0;
+  }
+  else{
+    
+  }
+  if (pass > 0){
+    forward(speed);
+    if (pass > 1){
+      pass = -1;
+    }
+  }
+  pass++;
+  
+  delay(50);  
+}
+
+
+void forward(int speed)
+{
+  servoLeft.writeMicroseconds(1500 + speed + Ladjustment + L2adjustment);
+  servoRight.writeMicroseconds(1500 - speed + Radjustment);
+}
+void backward()
+{
+  servoLeft.writeMicroseconds(1500 + Ladjustment);
+  servoRight.writeMicroseconds(1500 + Ladjustment);
+}
+void turn_right(int speed)
+{
+  servoLeft.writeMicroseconds(1500 + speed + Ladjustment);
+  servoRight.writeMicroseconds(1500 + speed + Radjustment);
+  delay(95);
+}
+void turn_left(int speed)
+{
+  servoLeft.writeMicroseconds(1500 - speed - Ladjustment);
+  servoRight.writeMicroseconds(1500 - speed + Radjustment);
+  delay(95);
+}
+
+
+int irDetectLeft(long frequency)
+{
+  tone(irLedPinLeft, frequency, 8);               // IRLED 38 kHz for at least 1 ms
+  delay(1);                                  // Wait 1 ms
+  int ir = digitalRead(irReceiverPinLeft);       // IR receiver -> ir variable
+  delay(1);                                  // Down time before recheck
+  return ir;                                 // Return 1 no detect, 0 detect
+}  
+int irDetectRight(long frequency)
+{
+  tone(irLedPinMid, frequency, 8);               // IRLED 38 kHz for at least 1 ms
+  delay(1);                                  // Wait 1 ms
+  int ir = digitalRead(irReceiverPinMid);       // IR receiver -> ir variable
+  delay(1);                                  // Down time before recheck
+  return ir;                                 // Return 1 no detect, 0 detect
+}
+
+int irDetectMid(long frequency)
+{
+  tone(irLedPinRight, frequency, 8);               // IRLED 38 kHz for at least 1 ms
+  delay(1);                                  // Wait 1 ms
+  int ir = digitalRead(irReceiverPinRight);       // IR receiver -> ir variable
+  delay(1);                                  // Down time before recheck
+  return ir;                                 // Return 1 no detect, 0 detect
+}
